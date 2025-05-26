@@ -37,6 +37,6 @@ public class User {
 
     @Size(min = 2, max = 50, message = "Username cannot exceed 50 characters")
     @NotBlank(message = "username name is required")
-    @Column(name = "last_name", nullable = false, length = 50)
+    @Column(name = "username", nullable = false, length = 50)
     private String username;
 }
