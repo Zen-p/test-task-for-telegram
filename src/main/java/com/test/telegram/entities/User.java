@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 
 @Entity
@@ -35,5 +34,9 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
+
+    @Size(min = 2, max = 50, message = "Username cannot exceed 50 characters")
+    @NotBlank(message = "username name is required")
+    @Column(name = "last_name", nullable = false, length = 50)
     private String username;
 }
