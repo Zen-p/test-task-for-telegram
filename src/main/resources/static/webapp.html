@@ -2,15 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram WebApp</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 80%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        h1 {
+            color: #ff4757;
+            font-size: 2em;
+            margin: 0;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5em; }
+            .container { padding: 20px; }
+        }
+    </style>
 </head>
 <body>
-<h1>Authenticating...</h1>
+<div class="container">
+    <h1>Authenticating...</h1>
+</div>
 <script>
     const initData = Telegram.WebApp.initData;
     if (!initData) {
-        document.body.innerHTML = '<h1>Error: Unable to get initData</h1>';
+        document.body.innerHTML = '<div class="container"><h1>Error: Unable to get initData</h1></div>';
     } else {
         console.log("text");
         fetch('/authenticate', {
@@ -25,16 +68,13 @@
             if (data === 'Authenticated') {
                 window.location.href = '/';
             } else {
-                document.body.innerHTML = '<h1>Authentication failed: ' + data + '</h1>';
+                document.body.innerHTML = '<div class="container"><h1>Authentication failed: ' + data + '</h1></div>';
             }
         })
         .catch(error => {
-            document.body.innerHTML = '<h1>Error: ' + error.message + '</h1>';
+            document.body.innerHTML = '<div class="container"><h1>Error: ' + error.message + '</h1></div>';
         });
     }
 </script>
 </body>
 </html>
-
-
-<!-- JavaScript я знаю недостаточно, чтобы реализовать отправку запроса таак что это я написал с помощью ии 🫤 -->
