@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -60,7 +62,9 @@ import java.util.*;
 */
 
 // тут, кажется, много времени уйдет
-// счетчик потраченных часов: 4.5
+// счетчик потраченных часов: 6
+
+// https://habr.com/ru/articles/850298/ - пометка для самого себя
 
 @RestController
 public class AuthController {
@@ -76,12 +80,10 @@ public class AuthController {
 
         String dataFromRequest = request.getInitData();
         Map<String, String> params = parseInitData(dataFromRequest);
+
         String hashFromParams = params.remove("hash");
-        ArrayList<String> sortedParams = new ArrayList<>(params.keySet());
-        Collections.sort(sortedParams);
 
-
-        boolean isValid = validateInitData(hashFromParams, sortedParams);
+        boolean isValid = validateInitData(hashFromParams, params);
 
         if (isValid) {
             System.out.println(true);
@@ -95,7 +97,6 @@ public class AuthController {
 
     private Map<String, String> parseInitData(String dataFromRequest) {
         List<NameValuePair> pairs = URLEncodedUtils.parse(dataFromRequest, StandardCharsets.UTF_8);
-        System.out.println(Arrays.toString(pairs.toArray()));
         Map<String, String> params = new HashMap<>();
         for (NameValuePair pair : pairs) {
             params.put(pair.getName(), pair.getValue());
@@ -103,7 +104,41 @@ public class AuthController {
         return params;
     }
 
-    private boolean validateInitData (String hash, ArrayList<String> params) {
-        return true;
+    private boolean validateInitData (String hash, Map<String, String> params) {
+        StringBuilder sb = new StringBuilder();
+        ArrayList<String> sortedParams = new ArrayList<>(params.keySet());
+        Collections.sort(sortedParams);
+
+        for (String string : sortedParams) {
+            sb.append(string).append("=").append(params.get(string)).append("\n");
+        }
+
+        try {
+            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec("WebAppData".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            hmacSha256.init(secretKeySpec);
+            byte[] secretKey = hmacSha256.doFinal(botToken.getBytes(StandardCharsets.UTF_8));
+
+            Mac hmacSha256Data = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeyData = new SecretKeySpec(secretKey, "HmacSHA256");
+            hmacSha256Data.init(secretKeyData);
+            byte[] signature = hmacSha256Data.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
+            String computedHash = bytesToHex(signature);
+
+            return computedHash.equalsIgnoreCase(hash);
+        } catch (Exception e) {
+            return false;
+        }
     }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+
+
 }
