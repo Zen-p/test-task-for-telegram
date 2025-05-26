@@ -88,6 +88,7 @@ public class AuthController {
 
     private Map<String, String> parseInitData(String dataFromRequest) {
         List<NameValuePair> pairs = URLEncodedUtils.parse(dataFromRequest, StandardCharsets.UTF_8);
+        System.out.println(Arrays.toString(pairs.toArray()));
         Map<String, String> params = new HashMap<>();
         for (NameValuePair pair : pairs) {
             params.put(pair.getName(), pair.getValue());
