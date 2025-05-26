@@ -60,7 +60,7 @@ import java.util.*;
 */
 
 // тут, кажется, много времени уйдет
-// счетчик потраченных часов: 4
+// счетчик потраченных часов: 4.5
 
 @RestController
 public class AuthController {
@@ -76,9 +76,16 @@ public class AuthController {
 
         String dataFromRequest = request.getInitData();
         Map<String, String> params = parseInitData(dataFromRequest);
+        String hashFromParams = params.remove("hash");
+        ArrayList<String> sortedParams = new ArrayList<>(params.keySet());
+        Collections.sort(sortedParams);
 
 
+        boolean isValid = validateInitData(hashFromParams, sortedParams);
 
+        if (isValid) {
+            System.out.println(true);
+        } else System.out.println(false);
 
 
 
@@ -94,5 +101,9 @@ public class AuthController {
             params.put(pair.getName(), pair.getValue());
         }
         return params;
+    }
+
+    private boolean validateInitData (String hash, ArrayList<String> params) {
+        return true;
     }
 }

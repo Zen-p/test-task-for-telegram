@@ -26,13 +26,13 @@ public class User {
 
     @Size(min = 2, max = 50, message = "First name cannot exceed 50 characters")
     @NotBlank(message = "First name is required")
-    @Column(name = "first_name", nullable = false, length = 50)
+    @Column(name = "first_name", length = 50)
     private String firstName;
 
 
     @Size(min = 2, max = 50, message = "Last name cannot exceed 50 characters")
     @NotBlank(message = "Last name is required")
-    @Column(name = "last_name", nullable = false, length = 50)
+    @Column(name = "last_name", length = 50)
     private String lastName;
 
 
