@@ -9,7 +9,7 @@ spring:
   application:
     name: test_task
 server:
-  port: 8080
+  port: 8085
 telegram:
   bot:
     token: 7556252840:AAGNQLvUEyLYSNZkGoc2JYJDt9jUt08kGbI
