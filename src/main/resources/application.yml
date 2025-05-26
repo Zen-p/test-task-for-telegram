@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spring_telegram_test_task
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: 'create-drop'
+  application:
+    name: test_task
+server:
+  port: 8080
+telegram:
+  bot:
+    token: 7556252840:AAGNQLvUEyLYSNZkGoc2JYJDt9jUt08kGbI
+
+
