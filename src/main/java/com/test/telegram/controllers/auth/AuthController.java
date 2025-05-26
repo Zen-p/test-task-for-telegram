@@ -17,6 +17,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /*
@@ -62,7 +63,7 @@ import java.util.*;
 */
 
 // тут, кажется, много времени уйдет
-// счетчик потраченных часов: 6
+// счетчик потраченных часов: 7
 
 // https://habr.com/ru/articles/850298/ - пометка для самого себя
 
@@ -105,13 +106,13 @@ public class AuthController {
     }
 
     private boolean validateInitData (String hash, Map<String, String> params) {
-        StringBuilder sb = new StringBuilder();
+
         ArrayList<String> sortedParams = new ArrayList<>(params.keySet());
         Collections.sort(sortedParams);
 
-        for (String string : sortedParams) {
-            sb.append(string).append("=").append(params.get(string)).append("\n");
-        }
+        String dataCheckString = sortedParams.stream()
+                .map(key -> key + "=" + params.get(key))
+                .collect(Collectors.joining("\n"));
 
         try {
             Mac hmacSha256 = Mac.getInstance("HmacSHA256");
@@ -122,7 +123,7 @@ public class AuthController {
             Mac hmacSha256Data = Mac.getInstance("HmacSHA256");
             SecretKeySpec secretKeyData = new SecretKeySpec(secretKey, "HmacSHA256");
             hmacSha256Data.init(secretKeyData);
-            byte[] signature = hmacSha256Data.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
+            byte[] signature = hmacSha256Data.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
             String computedHash = bytesToHex(signature);
 
             return computedHash.equalsIgnoreCase(hash);
