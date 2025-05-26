@@ -10,6 +10,7 @@ import lombok.Data;
 @Entity
 @Data
 @AllArgsConstructor
+@Table(name = "\"user\"")
 public class User {
 
     @Id
