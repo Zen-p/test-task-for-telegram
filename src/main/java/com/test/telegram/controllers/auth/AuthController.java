@@ -3,12 +3,18 @@ package com.test.telegram.controllers.auth;
 import com.test.telegram.DTOs.AuthRequest;
 import com.test.telegram.repositories.UserRepository;
 
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 
 /*
@@ -54,7 +60,7 @@ import org.springframework.web.bind.annotation.RestController;
 */
 
 // тут, кажется, много времени уйдет
-// счетчик потраченных часов: 3
+// счетчик потраченных часов: 4
 
 @RestController
 public class AuthController {
@@ -69,10 +75,23 @@ public class AuthController {
     public ResponseEntity<String> authenticate(@RequestBody AuthRequest request) {
 
         String dataFromRequest = request.getInitData();
+        Map<String, String> params = parseInitData(dataFromRequest);
+
+
+
 
 
 
         return ResponseEntity.ok("Smthng");
     }
 
+
+    private Map<String, String> parseInitData(String dataFromRequest) {
+        List<NameValuePair> pairs = URLEncodedUtils.parse(dataFromRequest, StandardCharsets.UTF_8);
+        Map<String, String> params = new HashMap<>();
+        for (NameValuePair pair : pairs) {
+            params.put(pair.getName(), pair.getValue());
+        }
+        return params;
+    }
 }
