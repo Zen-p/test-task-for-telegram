@@ -5,39 +5,53 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @AllArgsConstructor
-@Table(name = "\"user\"")
+@NoArgsConstructor
+@Table(name = "telegram_user")
 public class User {
 
     @Id
-    @SequenceGenerator (
-        name = "user_sequence_generator",
-        sequenceName = "user_sequence"
-            )
-    @GeneratedValue (
-        strategy = GenerationType.SEQUENCE,
-        generator = "user_sequence_generator"
-            )
     private Long id;
 
-    @Size(min = 2, max = 50, message = "First name cannot exceed 50 characters")
-    @NotBlank(message = "First name is required")
-    @Column(name = "first_name", length = 50)
+
     private String firstName;
-
-
-    @Size(min = 2, max = 50, message = "Last name cannot exceed 50 characters")
-    @NotBlank(message = "Last name is required")
-    @Column(name = "last_name", length = 50)
     private String lastName;
-
-
-    @Size(min = 2, max = 50, message = "Username cannot exceed 50 characters")
-    @NotBlank(message = "username name is required")
-    @Column(name = "username", nullable = false, length = 50)
     private String username;
+
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

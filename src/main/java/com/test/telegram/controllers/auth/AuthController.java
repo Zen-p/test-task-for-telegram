@@ -1,13 +1,20 @@
 package com.test.telegram.controllers.auth;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.telegram.DTOs.AuthRequest;
+import com.test.telegram.entities.User;
 import com.test.telegram.repositories.UserRepository;
 
+import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,7 +70,7 @@ import java.util.stream.Collectors;
 */
 
 // тут, кажется, много времени уйдет
-// счетчик потраченных часов: 7
+// счетчик потраченных часов: 8
 
 // https://habr.com/ru/articles/850298/ - пометка для самого себя
 
@@ -77,7 +84,8 @@ public class AuthController {
     private UserRepository userRepository;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody AuthRequest request) {
+    @Transactional
+    public ResponseEntity<String> authenticate(@RequestBody AuthRequest request, HttpSession session) {
 
         String dataFromRequest = request.getInitData();
         Map<String, String> params = parseInitData(dataFromRequest);
@@ -87,12 +95,44 @@ public class AuthController {
         boolean isValid = validateInitData(hashFromParams, params);
 
         if (isValid) {
-            System.out.println(true);
-        } else System.out.println(false);
+            try {
+                Map<String, Object> userMap = new ObjectMapper().readValue(params.get("user"), new TypeReference<Map<String, Object>>() {});
+                Long userId = ((Number) userMap.get("id")).longValue();
+                String firstName = (String) userMap.get("first_name");
+                String lastName = (String) userMap.get("last_name");
+                String username = (String) userMap.get("username");
 
+                User user = userRepository.findById(userId).orElse(null);
+                if (user == null) {
+                    user = new User();
+                    user.setId(userId);
+                    user.setFirstName(firstName);
+                    user.setLastName(lastName);
+                    user.setUsername(username);
+                } else {
+                    if (!Objects.equals(user.getFirstName(), firstName) || !Objects.equals(user.getLastName(), lastName) || !Objects.equals(user.getUsername(), username)) {
+                        user.setFirstName(firstName);
+                        user.setLastName(lastName);
+                        user.setUsername(username);
+                    } else {
+                        session.setAttribute("userId", userId);
+                        return ResponseEntity.ok("Authenticated");
+                    }
+                }
 
+                userRepository.save(user);
+                session.setAttribute("userId", userId);
+                return ResponseEntity.ok("Authenticated");
+            } catch (ObjectOptimisticLockingFailureException e) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Concurrent modification detected");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error parsing user data");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid data");
+        }
 
-        return ResponseEntity.ok("Smthng");
     }
 
 
@@ -139,7 +179,5 @@ public class AuthController {
         }
         return sb.toString();
     }
-
-
 
 }
